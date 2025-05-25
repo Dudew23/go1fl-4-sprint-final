@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Yandex-Practicum/tracker/internal/spentcalories"
 )
 
 const (
@@ -16,8 +18,8 @@ const (
 )
 
 var (
-	ErrConvToInt = errors.New("ошибка преобразования в целое число")
-	ErrWrongInfo = errors.New("некорректные данные")
+	ErrWrongInfo     = errors.New("incorrect data")
+	ErrStepsLessZero = errors.New("steps cannot be less than zero")
 )
 
 func parsePackage(data string) (int, time.Duration, error) {
@@ -30,10 +32,10 @@ func parsePackage(data string) (int, time.Duration, error) {
 
 	steps, err := strconv.Atoi(dataSlice[0])
 	if err != nil {
-		return 0, 0, ErrConvToInt
+		return 0, 0, err
 	}
 	if steps <= 0 {
-		return 0, 0, ErrConvToInt
+		return 0, 0, ErrStepsLessZero
 	}
 
 	duration, err := time.ParseDuration(dataSlice[1])
@@ -56,18 +58,15 @@ func DayActionInfo(data string, weight, height float64) string {
 		return ""
 	}
 
-	distance := (float64(steps) * stepLength) / mInKm
+	distance := float64(steps) * stepLength / mInKm
 
-	calories, err := WalkingSpentCalories(steps, weight, height, duration)
+	calories, err := spentcalories.WalkingSpentCalories(steps, weight, height, duration)
 	if err != nil {
 		return ""
 	}
-	
-	infoString := fmt.Sprintf(
-		"Количество шагов: %d.
-		Дистанция составила %.2f км.
-		Вы сожгли %.2f ккал.", steps, didistance, cacalories
-	)
 
-	return infoString
+	return fmt.Sprintf(
+		"Количество шагов: %d.\nДистанция составила %.2f км.\nВы сожгли %.2f ккал.",
+		steps, distance, calories,
+	)
 }

@@ -1,8 +1,8 @@
 package spentcalories
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -18,9 +18,10 @@ const (
 )
 
 var (
-	ErrConvToInt = errors.New("ошибка преобразования в целое число")
-	ErrWrongInfo = errors.New("некорректные данные")
-	ErrWrongTrain = errors.New("неизвестный тип тренировки")
+	ErrConvToInt     = errors.New("integer conversion error")
+	ErrWrongInfo     = errors.New("incorrect data")
+	ErrWrongTrain    = errors.New("unknown training type")
+	ErrStepsLessZero = errors.New("steps cannot be less than zero")
 )
 
 func parseTraining(data string) (int, string, time.Duration, error) {
@@ -33,7 +34,15 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 
 	steps, err := strconv.Atoi(threeSlice[0])
 	if err != nil {
-		return 0, "", 0, ErrConvToInt
+		return 0, "", 0, err
+	}
+	if steps <= 0 {
+		return 0, "", 0, ErrStepsLessZero
+	}
+
+	activity := strings.TrimSpace(threeSlice[1])
+	if activity != "Бег" && activity != "Ходьба" {
+		return 0, "", 0, ErrWrongTrain
 	}
 
 	duration, err := time.ParseDuration(threeSlice[2])
@@ -61,7 +70,7 @@ func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 }
 
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	
+
 	if duration <= 0 {
 		return 0, ErrWrongInfo
 	}
@@ -74,7 +83,7 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 }
 
 func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
-	
+
 	if duration <= 0 {
 		return 0, ErrWrongInfo
 	}
@@ -88,45 +97,33 @@ func WalkingSpentCalories(steps int, weight, height float64, duration time.Durat
 }
 
 func TrainingInfo(data string, weight, height float64) (string, error) {
-	
-	steps, tip, duration, err := parseTraining(data)
 
-	durationString := fmt.Sprintf("%.2f", duration.Hours())
-
+	steps, activity, duration, err := parseTraining(data)
 	if err != nil {
 		return "", err
 	}
 
-	switch(tip){
+	var info string
+	switch activity {
 	case "Бег":
-		distance := didistance(steps, height)
-		speed := meanmeanSpeed(steps, height, duration)
-		calories, err1 := RunningSpentCalories(steps, weight, height, duration)
+		distance := distance(steps, height)
+		speed := meanSpeed(steps, height, duration)
+		calories, _ := RunningSpentCalories(steps, weight, height, duration)
+		info = fmt.Sprintf(
+			"Тип тренировки: Бег\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
+			duration.Hours(), distance, speed, calories,
+		)
 	case "Ходьба":
-		distance := didistance(steps, height)
-		speed := meanmeanSpeed(steps, height, duration)
-		calories, err1 := WalkingSpentCalories(steps, weight, height, duration)
+		distance := distance(steps, height)
+		speed := meanSpeed(steps, height, duration)
+		calories, _ := WalkingSpentCalories(steps, weight, height, duration)
+		info = fmt.Sprintf(
+			"Тип тренировки: Бег\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
+			duration.Hours(), distance, speed, calories,
+		)
 	default:
-		ruturn "", ErrWrongTrain
-	}
-	
-	if err1 != nil {
-		return "", err1
+		return "", ErrWrongTrain
 	}
 
-	workout := fmt.Sprintf(
-		"Тип тренировки: %s
-		Длительность: %s ч.
-		Дистанция: %.2f км.
-		Скорость: %.2f км/ч
-		Сожгли калорий: %.2f",
-		tip,
-		durationString,
-		distance,
-		speed,
-		calories
-	)
-
-	return workout
-
+	return info, nil
 }
