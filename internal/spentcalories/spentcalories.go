@@ -25,7 +25,6 @@ var (
 )
 
 func parseTraining(data string) (int, string, time.Duration, error) {
-
 	threeSlice := strings.Split(data, ",")
 
 	if len(threeSlice) != 3 {
@@ -54,7 +53,6 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 }
 
 func distance(steps int, height float64) float64 {
-
 	return height * stepLengthCoefficient * float64(steps) / mInKm
 }
 
@@ -71,7 +69,7 @@ func meanSpeed(steps int, height float64, duration time.Duration) float64 {
 
 func RunningSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 
-	if duration <= 0 {
+	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
 		return 0, ErrWrongInfo
 	}
 
@@ -84,7 +82,7 @@ func RunningSpentCalories(steps int, weight, height float64, duration time.Durat
 
 func WalkingSpentCalories(steps int, weight, height float64, duration time.Duration) (float64, error) {
 
-	if duration <= 0 {
+	if steps <= 0 || weight <= 0 || height <= 0 || duration <= 0 {
 		return 0, ErrWrongInfo
 	}
 
