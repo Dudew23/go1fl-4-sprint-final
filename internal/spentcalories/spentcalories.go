@@ -21,7 +21,7 @@ const (
 var (
 	ErrConvToInt     = errors.New("integer conversion error")
 	ErrWrongInfo     = errors.New("incorrect data")
-	ErrWrongTrain    = errors.New("unknown training type")
+	ErrWrongTrain    = errors.New("неизвестный тип тренировки")
 	ErrStepsLessZero = errors.New("steps cannot be less than zero")
 	ErrDurLessZero   = errors.New("duration cannot be less than zero")
 )
@@ -115,7 +115,7 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		speed := meanSpeed(steps, height, duration)
 		calories, _ := RunningSpentCalories(steps, weight, height, duration)
 		info = fmt.Sprintf(
-			"Тип тренировки: Бег\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
+			"Тип тренировки: Бег\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 			duration.Hours(), distance, speed, calories,
 		)
 	case "Ходьба":
@@ -123,7 +123,7 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 		speed := meanSpeed(steps, height, duration)
 		calories, _ := WalkingSpentCalories(steps, weight, height, duration)
 		info = fmt.Sprintf(
-			"Тип тренировки: Бег\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f",
+			"Тип тренировки: Ходьба\nДлительность: %.2f ч.\nДистанция: %.2f км.\nСкорость: %.2f км/ч\nСожгли калорий: %.2f\n",
 			duration.Hours(), distance, speed, calories,
 		)
 	default:
