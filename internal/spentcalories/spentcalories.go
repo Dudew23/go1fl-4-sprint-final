@@ -3,6 +3,7 @@ package spentcalories
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
@@ -22,12 +23,13 @@ var (
 	ErrWrongInfo     = errors.New("incorrect data")
 	ErrWrongTrain    = errors.New("unknown training type")
 	ErrStepsLessZero = errors.New("steps cannot be less than zero")
+	ErrDurLessZero   = errors.New("duration cannot be less than zero")
 )
 
 func parseTraining(data string) (int, string, time.Duration, error) {
 	threeSlice := strings.Split(data, ",")
 
-	if len(threeSlice) != 3 {
+	if len(threeSlice) != 3 || data == "" {
 		return 0, "", 0, ErrWrongInfo
 	}
 
@@ -47,6 +49,10 @@ func parseTraining(data string) (int, string, time.Duration, error) {
 	duration, err := time.ParseDuration(threeSlice[2])
 	if err != nil {
 		return 0, "", 0, err
+	}
+
+	if duration <= 0 {
+		return 0, "", 0, ErrDurLessZero
 	}
 
 	return steps, threeSlice[1], duration, nil
@@ -98,6 +104,7 @@ func TrainingInfo(data string, weight, height float64) (string, error) {
 
 	steps, activity, duration, err := parseTraining(data)
 	if err != nil {
+		slog.Warn("You are stupid")
 		return "", err
 	}
 
